@@ -1099,3 +1099,16 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
 
   return UR_RESULT_ERROR_INVALID_ENUMERATION;
 }
+
+UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
+    ur_event_handle_t hEvent, ur_exp_command_buffer_sync_point_t syncPoint,
+    ur_profiling_info_t propName, size_t propSize, void *pPropValue,
+    size_t *pPropSizeRet) {
+  (void)hEvent;
+  (void)syncPoint;
+  (void)propName;
+  (void)propSize;
+  (void)pPropValue;
+  (void)pPropSizeRet;
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}

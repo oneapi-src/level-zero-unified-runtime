@@ -1019,3 +1019,89 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
     ur_exp_command_buffer_command_info_t, size_t, void *, size_t *) {
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
+
+UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
+    ur_event_handle_t hEvent, ur_exp_command_buffer_sync_point_t syncPoint,
+    ur_profiling_info_t propName, size_t propSize, void *pPropValue,
+    size_t *pPropSizeRet) {
+  std::shared_lock<ur_shared_mutex> EventLock(hEvent->Mutex);
+
+  if (hEvent->UrQueue &&
+      (hEvent->UrQueue->Properties & UR_QUEUE_FLAG_PROFILING_ENABLE) == 0) {
+    return UR_RESULT_ERROR_PROFILING_INFO_NOT_AVAILABLE;
+  }
+
+  ur_device_handle_t Device =
+      hEvent->UrQueue ? hEvent->UrQueue->Device : hEvent->Context->Devices[0];
+
+  uint64_t ZeTimerResolution = Device->ZeDeviceProperties->timerResolution;
+  const uint64_t TimestampMaxValue =
+      ((1ULL << Device->ZeDeviceProperties->kernelTimestampValidBits) - 1ULL);
+
+  UrReturnHelper ReturnValue(propSize, pPropValue, pPropSizeRet);
+
+  // Node profiling info is stored in the CommandData field of the event
+  // returned from graph submission.
+  // The timing info of each command corresponding to a node is stored using
+  // `zeCommandListAppendQueryKernelTimestamps`. This command stores the timing
+  // info of each command/node in the same order as the sync-points that were
+  // assigned to this node when it was enqueued. Consequently, `syncPoint`
+  // corresponds to the index of the memory slot containing the timestamps
+  // corresponding to this specific node.
+  if (hEvent->CommandType != UR_COMMAND_COMMAND_BUFFER_ENQUEUE_EXP) {
+    urPrint("urEventGetSyncPointProfilingInfoExp: not supported Event type\n");
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
+  if (!hEvent->CommandData) {
+    return UR_RESULT_ERROR_PROFILING_INFO_NOT_AVAILABLE;
+  }
+
+  command_buffer_profiling_t *ProfilingsPtr;
+  switch (propName) {
+  case UR_PROFILING_INFO_COMMAND_START: {
+    ProfilingsPtr =
+        static_cast<command_buffer_profiling_t *>(hEvent->CommandData);
+    const uint64_t Index = static_cast<uint64_t>(syncPoint);
+
+    if (Index > ProfilingsPtr->NumEvents) {
+      return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_EXP;
+    }
+
+    uint64_t StartTime = ProfilingsPtr->Timestamps[Index].global.kernelStart;
+    uint64_t ContextStartTime =
+        (StartTime & TimestampMaxValue) * ZeTimerResolution;
+    return ReturnValue(ContextStartTime);
+  }
+  case UR_PROFILING_INFO_COMMAND_END: {
+    ProfilingsPtr =
+        static_cast<command_buffer_profiling_t *>(hEvent->CommandData);
+    const uint64_t Index = static_cast<uint64_t>(syncPoint);
+
+    if (Index > ProfilingsPtr->NumEvents) {
+      return UR_RESULT_ERROR_INVALID_COMMAND_BUFFER_SYNC_POINT_EXP;
+    }
+
+    uint64_t EndTime = ProfilingsPtr->Timestamps[Index].global.kernelEnd;
+    uint64_t LastStart = ProfilingsPtr->Timestamps[Index].global.kernelStart;
+    uint64_t ContextStartTime = (LastStart & TimestampMaxValue);
+    uint64_t ContextEndTime = (EndTime & TimestampMaxValue);
+
+    //
+    // Handle a possible wrap-around (the underlying HW counter is <
+    // 64-bit). Note, it will not report correct time if there were multiple
+    // wrap arounds, and the longer term plan is to enlarge the capacity of
+    // the HW timestamps.
+    //
+    if (ContextEndTime <= ContextStartTime) {
+      ContextEndTime += TimestampMaxValue;
+    }
+    ContextEndTime *= ZeTimerResolution;
+    return ReturnValue(ContextEndTime);
+  }
+  default:
+    urPrint("urEventGetSyncPointProfilingInfoExp: not supported ParamName\n");
+    return UR_RESULT_ERROR_INVALID_VALUE;
+  }
+
+  return UR_RESULT_SUCCESS;
+}

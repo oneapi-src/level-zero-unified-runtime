@@ -577,6 +577,9 @@ etors:
 - name: DEVICE_GET_SELECTED
   desc: Enumerator for $xDeviceGetSelected
   value: '220'
+- name: EVENT_GET_SYNC_POINT_PROFILING_INFO_EXP
+  desc: Enumerator for $xEventGetSyncPointProfilingInfoExp
+  value: '221'
 ---
 type: enum
 desc: Defines structure types

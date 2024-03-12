@@ -191,3 +191,9 @@ UR_APIEXPORT ur_result_t UR_APICALL urCommandBufferCommandGetInfoExp(
     ur_exp_command_buffer_command_info_t, size_t, void *, size_t *) {
   return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
 }
+
+UR_APIEXPORT ur_result_t UR_APICALL urEventGetSyncPointProfilingInfoExp(
+    ur_event_handle_t, ur_exp_command_buffer_sync_point_t, ur_profiling_info_t,
+    size_t, void *, size_t *) {
+  return UR_RESULT_ERROR_UNSUPPORTED_FEATURE;
+}
