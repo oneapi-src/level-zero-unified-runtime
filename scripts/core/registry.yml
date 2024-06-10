@@ -604,6 +604,12 @@ etors:
 - name: BINDLESS_IMAGES_MAP_EXTERNAL_LINEAR_MEMORY_EXP
   desc: Enumerator for $xBindlessImagesMapExternalLinearMemoryExp
   value: '245'
+- name: SET_LOGGER_CALLBACK
+  desc: Enumerator for $xSetLoggerCallback
+  value: '246'
+- name: SET_LOGGER_CALLBACK_LEVEL
+  desc: Enumerator for $xSetLoggerCallbackLevel
+  value: '247'
 ---
 type: enum
 desc: Defines structure types
