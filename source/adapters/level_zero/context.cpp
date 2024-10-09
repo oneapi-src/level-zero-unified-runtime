@@ -589,7 +589,7 @@ void ur_context_handle_t_::addEventToContextCache(ur_event_handle_t Event) {
 
   if (Event->CounterBasedEventsEnabled) {
     bool UsingImmediateCommandlists =
-        !Event->UrQueue || Event->UrQueue->UsingImmCmdLists;
+        !Legacy(Event->UrQueue) || Legacy(Event->UrQueue)->UsingImmCmdLists;
     auto Cache = getCounterBasedEventCache(Event->isProfilingEnabled(),
                                            UsingImmediateCommandlists, Device);
     Cache->emplace_back(Event);
