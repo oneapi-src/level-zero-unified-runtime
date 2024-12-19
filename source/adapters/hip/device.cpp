@@ -223,7 +223,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
 
     return ReturnValue(uint64_t{MaxAlloc});
   }
-  case UR_DEVICE_INFO_IMAGE_SUPPORTED: {
+  case UR_DEVICE_INFO_IMAGE_SUPPORT: {
     bool Enabled = false;
 
     if (std::getenv("UR_HIP_ENABLE_IMAGE_SUPPORT") != nullptr) {
@@ -887,7 +887,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
     return ReturnValue(AddressBuffer,
                        strnlen(AddressBuffer, AddressBufferSize - 1) + 1);
   }
-  case UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED:
+  case UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORT:
     return ReturnValue(ur_bool_t{false});
   case UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT:
     return ReturnValue(ur_bool_t{false});
@@ -903,7 +903,11 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   case UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT:
     return ReturnValue(ur_bool_t{false});
   case UR_DEVICE_INFO_USM_POOL_SUPPORT:
+#ifdef UMF_ENABLE_POOL_TRACKING
     return ReturnValue(ur_bool_t{true});
+#else
+    return ReturnValue(ur_bool_t{false});
+#endif
   case UR_DEVICE_INFO_BFLOAT16:
     return ReturnValue(true);
   case UR_DEVICE_INFO_ASYNC_BARRIER:
@@ -956,7 +960,7 @@ UR_APIEXPORT ur_result_t UR_APICALL urDeviceGetInfo(ur_device_handle_t hDevice,
   }
   case UR_DEVICE_INFO_COMMAND_BUFFER_EVENT_SUPPORT_EXP:
     return ReturnValue(false);
-  case UR_DEVICE_INFO_LOW_POWER_EVENTS_EXP: {
+  case UR_DEVICE_INFO_LOW_POWER_EVENTS_SUPPORT_EXP: {
     return ReturnValue(false);
   }
   default:

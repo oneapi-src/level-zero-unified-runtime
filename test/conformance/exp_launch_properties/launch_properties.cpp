@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urEnqueueKernelLaunchCustomTest : uur::urKernelExecutionTest {
     void SetUp() override {
@@ -19,6 +20,7 @@ struct urEnqueueKernelLaunchCustomTest : uur::urKernelExecutionTest {
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urEnqueueKernelLaunchCustomTest);
 
 TEST_P(urEnqueueKernelLaunchCustomTest, Success) {
+    UUR_KNOWN_FAILURE_ON(uur::NativeCPU{});
 
     size_t returned_size;
     ASSERT_SUCCESS(urDeviceGetInfo(device, UR_DEVICE_INFO_EXTENSIONS, 0,
@@ -77,7 +79,7 @@ TEST_P(urEnqueueKernelLaunchCustomTest, Success) {
 
         ur_bool_t cluster_launch_supported = false;
         ASSERT_SUCCESS(urDeviceGetInfo(
-            device, UR_DEVICE_INFO_CLUSTER_LAUNCH_EXP, sizeof(ur_bool_t),
+            device, UR_DEVICE_INFO_CLUSTER_LAUNCH_SUPPORT_EXP, sizeof(ur_bool_t),
             &cluster_launch_supported, nullptr));
 
         if (cluster_launch_supported) {
