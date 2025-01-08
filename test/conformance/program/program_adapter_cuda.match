@@ -3,7 +3,7 @@ urProgramBuildTest.BuildFailure/*
 {{OPT}}urProgramCreateWithILTest.SuccessWithProperties/*
 {{OPT}}urProgramCreateWithILTest.BuildInvalidProgram/*
 # This test flakily fails
-{{OPT}}urProgramGetBuildInfoSingleTest.LogIsNullTerminated/*
+{{OPT}}urProgramGetBuildInfoTest.SuccessLog/*
 {{OPT}}urProgramSetSpecializationConstantsTest.Success/*
 {{OPT}}urProgramSetSpecializationConstantsTest.UseDefaultValue/*
 urProgramSetSpecializationConstantsTest.InvalidValueSize/*
