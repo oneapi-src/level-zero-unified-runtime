@@ -1632,28 +1632,30 @@ typedef enum ur_device_info_t {
                                                                      ///< available for this device.
     UR_DEVICE_INFO_KERNEL_SET_SPECIALIZATION_CONSTANTS = 106,        ///< [::ur_bool_t] support the ::urKernelSetSpecializationConstants entry
                                                                      ///< point
-    UR_DEVICE_INFO_MEMORY_BUS_WIDTH = 107,                           ///< [uint32_t][optional-query] return the width in bits of the memory bus
+    UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS = 107,       ///< [::ur_bool_t] support the ::urProgramSetSpecializationConstants entry
+                                                                     ///< point
+    UR_DEVICE_INFO_MEMORY_BUS_WIDTH = 108,                           ///< [uint32_t][optional-query] return the width in bits of the memory bus
                                                                      ///< interface of the device.
-    UR_DEVICE_INFO_MAX_WORK_GROUPS_3D = 108,                         ///< [size_t[3]] return max 3D work groups
-    UR_DEVICE_INFO_ASYNC_BARRIER = 109,                              ///< [::ur_bool_t] return true if Async Barrier is supported
-    UR_DEVICE_INFO_MEM_CHANNEL_SUPPORT = 110,                        ///< [::ur_bool_t] return true if specifying memory channels is supported
-    UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED = 111,             ///< [::ur_bool_t] Return true if the device supports enqueueing commands
+    UR_DEVICE_INFO_MAX_WORK_GROUPS_3D = 109,                         ///< [size_t[3]] return max 3D work groups
+    UR_DEVICE_INFO_ASYNC_BARRIER = 110,                              ///< [::ur_bool_t] return true if Async Barrier is supported
+    UR_DEVICE_INFO_MEM_CHANNEL_SUPPORT = 111,                        ///< [::ur_bool_t] return true if specifying memory channels is supported
+    UR_DEVICE_INFO_HOST_PIPE_READ_WRITE_SUPPORTED = 112,             ///< [::ur_bool_t] Return true if the device supports enqueueing commands
                                                                      ///< to read and write pipes from the host.
-    UR_DEVICE_INFO_MAX_REGISTERS_PER_WORK_GROUP = 112,               ///< [uint32_t][optional-query] The maximum number of registers available
+    UR_DEVICE_INFO_MAX_REGISTERS_PER_WORK_GROUP = 113,               ///< [uint32_t][optional-query] The maximum number of registers available
                                                                      ///< per block.
-    UR_DEVICE_INFO_IP_VERSION = 113,                                 ///< [uint32_t][optional-query] The device IP version. The meaning of the
+    UR_DEVICE_INFO_IP_VERSION = 114,                                 ///< [uint32_t][optional-query] The device IP version. The meaning of the
                                                                      ///< device IP version is implementation-defined, but newer devices should
                                                                      ///< have a higher version than older devices.
-    UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT = 114,                     ///< [::ur_bool_t] return true if the device supports virtual memory.
-    UR_DEVICE_INFO_ESIMD_SUPPORT = 115,                              ///< [::ur_bool_t] return true if the device supports ESIMD.
-    UR_DEVICE_INFO_COMPONENT_DEVICES = 116,                          ///< [::ur_device_handle_t[]][optional-query] The set of component devices
+    UR_DEVICE_INFO_VIRTUAL_MEMORY_SUPPORT = 115,                     ///< [::ur_bool_t] return true if the device supports virtual memory.
+    UR_DEVICE_INFO_ESIMD_SUPPORT = 116,                              ///< [::ur_bool_t] return true if the device supports ESIMD.
+    UR_DEVICE_INFO_COMPONENT_DEVICES = 117,                          ///< [::ur_device_handle_t[]][optional-query] The set of component devices
                                                                      ///< contained by this composite device.
-    UR_DEVICE_INFO_COMPOSITE_DEVICE = 117,                           ///< [::ur_device_handle_t][optional-query] The composite device containing
+    UR_DEVICE_INFO_COMPOSITE_DEVICE = 118,                           ///< [::ur_device_handle_t][optional-query] The composite device containing
                                                                      ///< this component device.
-    UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT = 118,                    ///< [::ur_bool_t] return true if the device supports the
+    UR_DEVICE_INFO_GLOBAL_VARIABLE_SUPPORT = 119,                    ///< [::ur_bool_t] return true if the device supports the
                                                                      ///< `EnqueueDeviceGlobalVariableWrite` and
                                                                      ///< `EnqueueDeviceGlobalVariableRead` entry points.
-    UR_DEVICE_INFO_USM_POOL_SUPPORT = 119,                           ///< [::ur_bool_t] return true if the device supports USM pooling. Pertains
+    UR_DEVICE_INFO_USM_POOL_SUPPORT = 120,                           ///< [::ur_bool_t] return true if the device supports USM pooling. Pertains
                                                                      ///< to the `USMPool` entry points and usage of the `pool` parameter of the
                                                                      ///< USM alloc entry points.
     UR_DEVICE_INFO_COMMAND_BUFFER_SUPPORT_EXP = 0x1000,              ///< [::ur_bool_t] Returns true if the device supports the use of
@@ -4726,6 +4728,10 @@ typedef struct ur_specialization_constant_info_t {
 /// @brief Set an array of specialization constants on a Program.
 ///
 /// @details
+///     - This entry point is optional, the application should query for support
+///       with device query
+///       ::UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS passed to
+///       ::urDeviceGetInfo.
 ///     - The application may call this function from simultaneous threads for
 ///       the same device.
 ///     - The implementation of this function should be thread-safe.
@@ -4745,6 +4751,8 @@ typedef struct ur_specialization_constant_info_t {
 ///         + `NULL == pSpecConstants`
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
 ///         + `count == 0`
+///     - ::UR_RESULT_ERROR_UNSUPPORTED_FEATURE
+///         + If ::UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS query is false
 ///     - ::UR_RESULT_ERROR_INVALID_VALUE
 ///         + A pSpecConstant entry contains a size that does not match that of the specialization constant in the module.
 ///         + A pSpecConstant entry contains a nullptr pValue.
