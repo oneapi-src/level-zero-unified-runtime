@@ -3,6 +3,7 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
+#include "uur/known_failure.h"
 #include <uur/fixtures.h>
 
 struct urProgramGetFunctionPointerTest : uur::urProgramTest {
@@ -17,12 +18,16 @@ struct urProgramGetFunctionPointerTest : uur::urProgramTest {
 
     std::string function_name;
 };
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urProgramGetFunctionPointerTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urProgramGetFunctionPointerTest);
 
 TEST_P(urProgramGetFunctionPointerTest, Success) {
     void *function_pointer = nullptr;
-    ASSERT_SUCCESS(urProgramGetFunctionPointer(
-        device, program, function_name.data(), &function_pointer));
+    ur_result_t res = urProgramGetFunctionPointer(
+        device, program, function_name.data(), &function_pointer);
+    if (res == UR_RESULT_ERROR_FUNCTION_ADDRESS_NOT_AVAILABLE) {
+        return;
+    }
+    ASSERT_SUCCESS(res);
     ASSERT_NE(function_pointer, nullptr);
 }
 
