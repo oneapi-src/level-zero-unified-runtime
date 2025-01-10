@@ -4,11 +4,22 @@
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 
 #include <uur/fixtures.h>
+#include <uur/known_failure.h>
 
 struct urProgramSetSpecializationConstantsTest : uur::urKernelExecutionTest {
     void SetUp() override {
         program_name = "spec_constant";
         UUR_RETURN_ON_FATAL_FAILURE(urProgramTest::SetUp());
+
+        bool supports_kernel_spec_constant = false;
+        ASSERT_SUCCESS(urDeviceGetInfo(
+            device, UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS,
+            sizeof(supports_kernel_spec_constant),
+            &supports_kernel_spec_constant, nullptr));
+        if (!supports_kernel_spec_constant) {
+            GTEST_SKIP()
+                << "Device does not support setting program spec constants.";
+        }
     }
 
     uint32_t spec_value = 42;
@@ -16,7 +27,32 @@ struct urProgramSetSpecializationConstantsTest : uur::urKernelExecutionTest {
     ur_specialization_constant_info_t info = {0, sizeof(spec_value),
                                               &spec_value};
 };
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(urProgramSetSpecializationConstantsTest);
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urProgramSetSpecializationConstantsTest);
+
+struct urProgramSetSpecializationConstantsNegativeTest
+    : uur::urKernelExecutionTest {
+    void SetUp() override {
+        program_name = "spec_constant";
+        UUR_RETURN_ON_FATAL_FAILURE(urProgramTest::SetUp());
+
+        bool supports_kernel_spec_constant = false;
+        ASSERT_SUCCESS(urDeviceGetInfo(
+            device, UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS,
+            sizeof(supports_kernel_spec_constant),
+            &supports_kernel_spec_constant, nullptr));
+        if (supports_kernel_spec_constant) {
+            GTEST_SKIP()
+                << "Device does supports setting program spec constants.";
+        }
+    }
+
+    uint32_t spec_value = 42;
+    uint32_t default_spec_value = 1000; // Must match the one in the SYCL source
+    ur_specialization_constant_info_t info = {0, sizeof(spec_value),
+                                              &spec_value};
+};
+UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(
+    urProgramSetSpecializationConstantsNegativeTest);
 
 struct urProgramSetMultipleSpecializationConstantsTest
     : uur::urKernelExecutionTest {
@@ -24,9 +60,19 @@ struct urProgramSetMultipleSpecializationConstantsTest
     void SetUp() override {
         program_name = "spec_constant_multiple";
         UUR_RETURN_ON_FATAL_FAILURE(urProgramTest::SetUp());
+
+        bool supports_kernel_spec_constant = false;
+        ASSERT_SUCCESS(urDeviceGetInfo(
+            device, UR_DEVICE_INFO_PROGRAM_SET_SPECIALIZATION_CONSTANTS,
+            sizeof(supports_kernel_spec_constant),
+            &supports_kernel_spec_constant, nullptr));
+        if (!supports_kernel_spec_constant) {
+            GTEST_SKIP()
+                << "Device does not support setting program spec constants.";
+        }
     }
 };
-UUR_INSTANTIATE_KERNEL_TEST_SUITE_P(
+UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(
     urProgramSetMultipleSpecializationConstantsTest);
 
 TEST_P(urProgramSetSpecializationConstantsTest, Success) {
@@ -41,6 +87,11 @@ TEST_P(urProgramSetSpecializationConstantsTest, Success) {
     AddBuffer1DArg(sizeof(spec_value), &buffer);
     Launch1DRange(1);
     ValidateBuffer<uint32_t>(buffer, sizeof(spec_value), spec_value);
+}
+
+TEST_P(urProgramSetSpecializationConstantsNegativeTest, Unsupported) {
+    ASSERT_EQ_RESULT(UR_RESULT_ERROR_UNSUPPORTED_FEATURE,
+                     urProgramSetSpecializationConstants(program, 1, &info));
 }
 
 TEST_P(urProgramSetSpecializationConstantsTest, UseDefaultValue) {
@@ -143,6 +194,9 @@ TEST_P(urProgramSetSpecializationConstantsTest, InvalidSizeCount) {
 }
 
 TEST_P(urProgramSetSpecializationConstantsTest, InvalidValueSize) {
+    UUR_KNOWN_FAILURE_ON(uur::CUDA{}, uur::HIP{}, uur::LevelZero{},
+                         uur::LevelZeroV2{});
+
     ur_specialization_constant_info_t bad_info = {0, 0x1000, &spec_value};
     ASSERT_EQ_RESULT(
         UR_RESULT_ERROR_INVALID_VALUE,
@@ -150,6 +204,8 @@ TEST_P(urProgramSetSpecializationConstantsTest, InvalidValueSize) {
 }
 
 TEST_P(urProgramSetSpecializationConstantsTest, InvalidValueId) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
+
     ur_specialization_constant_info_t bad_info = {999, sizeof(spec_value),
                                                   &spec_value};
     ASSERT_EQ_RESULT(
@@ -158,6 +214,8 @@ TEST_P(urProgramSetSpecializationConstantsTest, InvalidValueId) {
 }
 
 TEST_P(urProgramSetSpecializationConstantsTest, InvalidValuePtr) {
+    UUR_KNOWN_FAILURE_ON(uur::LevelZero{}, uur::LevelZeroV2{});
+
     ur_specialization_constant_info_t bad_info = {0, sizeof(spec_value),
                                                   nullptr};
     ASSERT_EQ_RESULT(
