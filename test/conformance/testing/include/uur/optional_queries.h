@@ -2,8 +2,9 @@
  *
  * Copyright (C) 2024 Intel Corporation
  *
- * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM Exceptions.
- * See LICENSE.TXT
+ * Part of the Unified-Runtime Project, under the Apache License v2.0 with LLVM
+ * Exceptions. See LICENSE.TXT
+ *
  * SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
  *
  * @file optional_queries.h
@@ -43,9 +44,9 @@ constexpr std::array optional_ur_device_info_t = {
 };
 
 template <> inline bool isQueryOptional(ur_device_info_t query) {
-    return std::find(optional_ur_device_info_t.begin(),
-                     optional_ur_device_info_t.end(),
-                     query) != optional_ur_device_info_t.end();
+  return std::find(optional_ur_device_info_t.begin(),
+                   optional_ur_device_info_t.end(),
+                   query) != optional_ur_device_info_t.end();
 }
 
 constexpr std::array optional_ur_context_info_t = {
@@ -56,9 +57,9 @@ constexpr std::array optional_ur_context_info_t = {
 };
 
 template <> inline bool isQueryOptional(ur_context_info_t query) {
-    return std::find(optional_ur_context_info_t.begin(),
-                     optional_ur_context_info_t.end(),
-                     query) != optional_ur_context_info_t.end();
+  return std::find(optional_ur_context_info_t.begin(),
+                   optional_ur_context_info_t.end(),
+                   query) != optional_ur_context_info_t.end();
 }
 
 constexpr std::array optional_ur_usm_alloc_info_t = {
@@ -66,9 +67,9 @@ constexpr std::array optional_ur_usm_alloc_info_t = {
 };
 
 template <> inline bool isQueryOptional(ur_usm_alloc_info_t query) {
-    return std::find(optional_ur_usm_alloc_info_t.begin(),
-                     optional_ur_usm_alloc_info_t.end(),
-                     query) != optional_ur_usm_alloc_info_t.end();
+  return std::find(optional_ur_usm_alloc_info_t.begin(),
+                   optional_ur_usm_alloc_info_t.end(),
+                   query) != optional_ur_usm_alloc_info_t.end();
 }
 
 constexpr std::array optional_ur_program_info_t = {
@@ -77,9 +78,9 @@ constexpr std::array optional_ur_program_info_t = {
 };
 
 template <> inline bool isQueryOptional(ur_program_info_t query) {
-    return std::find(optional_ur_program_info_t.begin(),
-                     optional_ur_program_info_t.end(),
-                     query) != optional_ur_program_info_t.end();
+  return std::find(optional_ur_program_info_t.begin(),
+                   optional_ur_program_info_t.end(),
+                   query) != optional_ur_program_info_t.end();
 }
 
 constexpr std::array optional_ur_kernel_info_t = {
@@ -87,9 +88,9 @@ constexpr std::array optional_ur_kernel_info_t = {
 };
 
 template <> inline bool isQueryOptional(ur_kernel_info_t query) {
-    return std::find(optional_ur_kernel_info_t.begin(),
-                     optional_ur_kernel_info_t.end(),
-                     query) != optional_ur_kernel_info_t.end();
+  return std::find(optional_ur_kernel_info_t.begin(),
+                   optional_ur_kernel_info_t.end(),
+                   query) != optional_ur_kernel_info_t.end();
 }
 
 constexpr std::array optional_ur_kernel_group_info_t = {
@@ -99,9 +100,9 @@ constexpr std::array optional_ur_kernel_group_info_t = {
 };
 
 template <> inline bool isQueryOptional(ur_kernel_group_info_t query) {
-    return std::find(optional_ur_kernel_group_info_t.begin(),
-                     optional_ur_kernel_group_info_t.end(),
-                     query) != optional_ur_kernel_group_info_t.end();
+  return std::find(optional_ur_kernel_group_info_t.begin(),
+                   optional_ur_kernel_group_info_t.end(),
+                   query) != optional_ur_kernel_group_info_t.end();
 }
 
 constexpr std::array optional_ur_queue_info_t = {
@@ -109,9 +110,9 @@ constexpr std::array optional_ur_queue_info_t = {
 };
 
 template <> inline bool isQueryOptional(ur_queue_info_t query) {
-    return std::find(optional_ur_queue_info_t.begin(),
-                     optional_ur_queue_info_t.end(),
-                     query) != optional_ur_queue_info_t.end();
+  return std::find(optional_ur_queue_info_t.begin(),
+                   optional_ur_queue_info_t.end(),
+                   query) != optional_ur_queue_info_t.end();
 }
 
 } // namespace uur
