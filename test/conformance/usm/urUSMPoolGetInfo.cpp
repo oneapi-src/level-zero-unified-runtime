@@ -3,41 +3,36 @@
 // See LICENSE.TXT
 // SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 #include "ur_api.h"
-#include <map>
 #include <uur/fixtures.h>
-
-std::unordered_map<ur_usm_pool_info_t, size_t> pool_info_size_map = {
-    {UR_USM_POOL_INFO_CONTEXT, sizeof(ur_context_handle_t)},
-    {UR_USM_POOL_INFO_REFERENCE_COUNT, sizeof(uint32_t)},
-};
-
-using urUSMPoolGetInfoTestWithInfoParam =
-    uur::urUSMPoolTestWithParam<ur_usm_pool_info_t>;
-
-UUR_DEVICE_TEST_SUITE_P(urUSMPoolGetInfoTestWithInfoParam,
-                        ::testing::Values(UR_USM_POOL_INFO_CONTEXT,
-                                          UR_USM_POOL_INFO_REFERENCE_COUNT),
-                        uur::deviceTestWithParamPrinter<ur_usm_pool_info_t>);
-
-TEST_P(urUSMPoolGetInfoTestWithInfoParam, Success) {
-    ur_usm_pool_info_t info_type = getParam();
-    size_t size = 0;
-    ASSERT_SUCCESS_OR_OPTIONAL_QUERY(
-        urUSMPoolGetInfo(pool, info_type, 0, nullptr, &size), info_type);
-    ASSERT_NE(size, 0);
-
-    if (const auto expected_size = pool_info_size_map.find(info_type);
-        expected_size != pool_info_size_map.end()) {
-        ASSERT_EQ(expected_size->second, size);
-    }
-
-    std::vector<uint8_t> data(size);
-    ASSERT_SUCCESS(
-        urUSMPoolGetInfo(pool, info_type, size, data.data(), nullptr));
-}
 
 using urUSMPoolGetInfoTest = uur::urUSMPoolTest;
 UUR_INSTANTIATE_DEVICE_TEST_SUITE_P(urUSMPoolGetInfoTest);
+
+TEST_P(urUSMPoolGetInfoTest, SuccessReferenceCount) {
+    size_t size = 0;
+    auto infoType = UR_USM_POOL_INFO_REFERENCE_COUNT;
+    ASSERT_SUCCESS(urUSMPoolGetInfo(pool, infoType, 0, nullptr, &size));
+    ASSERT_EQ(sizeof(uint32_t), size);
+
+    uint32_t returned_reference_count = 0;
+    ASSERT_SUCCESS(urUSMPoolGetInfo(pool, infoType, size,
+                                    &returned_reference_count, nullptr));
+
+    ASSERT_GT(returned_reference_count, 0U);
+}
+
+TEST_P(urUSMPoolGetInfoTest, SuccessContext) {
+    size_t size = 0;
+    auto infoType = UR_USM_POOL_INFO_CONTEXT;
+    ASSERT_SUCCESS(urUSMPoolGetInfo(pool, infoType, 0, nullptr, &size));
+    ASSERT_EQ(sizeof(ur_context_handle_t), size);
+
+    ur_context_handle_t returned_context = nullptr;
+    ASSERT_SUCCESS(
+        urUSMPoolGetInfo(pool, infoType, size, &returned_context, nullptr));
+
+    ASSERT_EQ(context, returned_context);
+}
 
 TEST_P(urUSMPoolGetInfoTest, InvalidNullHandlePool) {
     ur_context_handle_t context = nullptr;
