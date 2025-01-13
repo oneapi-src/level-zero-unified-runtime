@@ -252,7 +252,7 @@ UUR_DEVICE_TEST_SUITE_P(
         UR_DEVICE_INFO_PREFERRED_VECTOR_WIDTH_DOUBLE,          //
         UR_DEVICE_INFO_PREFERRED_VECTOR_WIDTH_HALF,            //
         UR_DEVICE_INFO_PREFERRED_VECTOR_WIDTH_INT,             //
-        UR_DEVICE_INFO_NUM_COMPUTE_UNITS                       // 
+        UR_DEVICE_INFO_NUM_COMPUTE_UNITS                       //
         ),
     uur::deviceTestWithParamPrinter<ur_device_info_t>);
 
