@@ -1566,7 +1566,7 @@ __urdlllocal ur_result_t UR_APICALL urMemImageGetInfo(
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
-        if (UR_IMAGE_INFO_DEPTH < propName) {
+        if (UR_IMAGE_INFO_NUM_SAMPLES < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
 
@@ -7456,7 +7456,7 @@ __urdlllocal ur_result_t UR_APICALL urBindlessImagesImageGetInfoExp(
             return UR_RESULT_ERROR_INVALID_NULL_POINTER;
         }
 
-        if (UR_IMAGE_INFO_DEPTH < propName) {
+        if (UR_IMAGE_INFO_NUM_SAMPLES < propName) {
             return UR_RESULT_ERROR_INVALID_ENUMERATION;
         }
     }
