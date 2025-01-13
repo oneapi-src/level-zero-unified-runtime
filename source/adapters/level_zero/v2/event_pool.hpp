@@ -50,6 +50,7 @@ public:
   event_flags_t getFlags() const;
 
 private:
+  // Do not use ref couting on context to avoid circular dependency.
   ur_context_handle_t hContext;
   std::unique_ptr<event_provider> provider;
 

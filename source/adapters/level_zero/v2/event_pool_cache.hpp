@@ -41,6 +41,7 @@ public:
   raii::cache_borrowed_event_pool borrow(DeviceId, event_flags_t flags);
 
 private:
+  // Do not use ref couting on context to avoid circular dependency.
   ur_context_handle_t hContext;
   ur_mutex mutex;
   ProviderCreateFunc providerCreate;
