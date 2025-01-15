@@ -2595,13 +2595,16 @@ typedef enum ur_image_channel_type_t {
 ///////////////////////////////////////////////////////////////////////////////
 /// @brief Image information types
 typedef enum ur_image_info_t {
-    UR_IMAGE_INFO_FORMAT = 0,       ///< [::ur_image_format_t] image format
-    UR_IMAGE_INFO_ELEMENT_SIZE = 1, ///< [size_t] element size
-    UR_IMAGE_INFO_ROW_PITCH = 2,    ///< [size_t] row pitch
-    UR_IMAGE_INFO_SLICE_PITCH = 3,  ///< [size_t] slice pitch
-    UR_IMAGE_INFO_WIDTH = 4,        ///< [size_t] image width
-    UR_IMAGE_INFO_HEIGHT = 5,       ///< [size_t] image height
-    UR_IMAGE_INFO_DEPTH = 6,        ///< [size_t] image depth
+    UR_IMAGE_INFO_FORMAT = 0,         ///< [::ur_image_format_t] image format
+    UR_IMAGE_INFO_ELEMENT_SIZE = 1,   ///< [size_t] element size
+    UR_IMAGE_INFO_ROW_PITCH = 2,      ///< [size_t] row pitch
+    UR_IMAGE_INFO_SLICE_PITCH = 3,    ///< [size_t] slice pitch
+    UR_IMAGE_INFO_WIDTH = 4,          ///< [size_t] image width
+    UR_IMAGE_INFO_HEIGHT = 5,         ///< [size_t] image height
+    UR_IMAGE_INFO_DEPTH = 6,          ///< [size_t] image depth
+    UR_IMAGE_INFO_ARRAY_SIZE = 7,     ///< [size_t] array size
+    UR_IMAGE_INFO_NUM_MIP_LEVELS = 8, ///< [size_t] number of MIP levels
+    UR_IMAGE_INFO_NUM_SAMPLES = 9,    ///< [size_t] number of samples
     /// @cond
     UR_IMAGE_INFO_FORCE_UINT32 = 0x7fffffff
     /// @endcond
@@ -3055,7 +3058,7 @@ urMemGetInfo(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hMemory`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_IMAGE_INFO_DEPTH < propName`
+///         + `::UR_IMAGE_INFO_NUM_SAMPLES < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
@@ -7990,7 +7993,7 @@ urBindlessImagesImageCopyExp(
 ///     - ::UR_RESULT_ERROR_INVALID_NULL_HANDLE
 ///         + `NULL == hContext`
 ///     - ::UR_RESULT_ERROR_INVALID_ENUMERATION
-///         + `::UR_IMAGE_INFO_DEPTH < propName`
+///         + `::UR_IMAGE_INFO_NUM_SAMPLES < propName`
 ///     - ::UR_RESULT_ERROR_UNSUPPORTED_ENUMERATION
 ///         + If `propName` is not supported by the adapter.
 ///     - ::UR_RESULT_ERROR_INVALID_SIZE
