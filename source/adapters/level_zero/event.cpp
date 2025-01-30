@@ -223,22 +223,6 @@ ur_result_t urEnqueueEventsWaitWithBarrierExt(
         if (Queue->isInOrderQueue() && InOrderBarrierBySignal &&
             !Queue->isProfilingEnabled()) {
           if (EventWaitList.Length) {
-            if (CmdList->second.IsInOrderList) {
-              for (unsigned i = EventWaitList.Length; i-- > 0;) {
-                // If the event is a multidevice event, then given driver in
-                // order lists, we cannot include this into the wait event list
-                // due to driver limitations.
-                if (EventWaitList.UrEventList[i]->IsMultiDevice) {
-                  EventWaitList.Length--;
-                  if (EventWaitList.Length != i) {
-                    std::swap(EventWaitList.UrEventList[i],
-                              EventWaitList.UrEventList[EventWaitList.Length]);
-                    std::swap(EventWaitList.ZeEventList[i],
-                              EventWaitList.ZeEventList[EventWaitList.Length]);
-                  }
-                }
-              }
-            }
             ZE2UR_CALL(zeCommandListAppendWaitOnEvents,
                        (CmdList->first, EventWaitList.Length,
                         EventWaitList.ZeEventList));
