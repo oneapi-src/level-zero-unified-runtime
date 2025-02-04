@@ -16,6 +16,7 @@
 #include <umf/memory_pool_ops.h>
 #include <umf/memory_provider.h>
 #include <umf/memory_provider_ops.h>
+#include <umf/pools/pool_proxy.h>
 #include <umf/providers/provider_cuda.h>
 #include <ur_api.h>
 
@@ -29,6 +30,13 @@
 #include <utility>
 
 #define UMF_CHECK_ERROR(UmfResult) UR_CHECK_ERROR(umf::umf2urResult(UmfResult));
+
+#define UMF_CHECK_PTR(ptr)                                                     \
+  do {                                                                         \
+    if ((ptr) == nullptr) {                                                    \
+      UR_CHECK_ERROR(UR_RESULT_ERROR_OUT_OF_HOST_MEMORY);                      \
+    }                                                                          \
+  } while (0)
 
 #define UMF_RETURN_UMF_ERROR(UmfResult)                                        \
   do {                                                                         \
@@ -243,6 +251,21 @@ static inline auto poolMakeUniqueFromOps(umf_memory_pool_ops_t *ops,
       UMF_RESULT_SUCCESS, pool_unique_handle_t(hPool, umfPoolDestroy)};
 }
 
+static inline auto
+poolMakeUniqueFromOps_CudaProvider(umf_memory_pool_ops_t *ops,
+                                   umf_memory_provider_handle_t provider,
+                                   void *params) {
+  umf_memory_pool_handle_t hPool;
+  auto ret = umfPoolCreate(ops, provider, params, 0, &hPool);
+  if (ret != UMF_RESULT_SUCCESS) {
+    return std::pair<umf_result_t, pool_unique_handle_t>{
+        ret, pool_unique_handle_t(nullptr, nullptr)};
+  }
+
+  return std::pair<umf_result_t, pool_unique_handle_t>{
+      UMF_RESULT_SUCCESS, pool_unique_handle_t(hPool, umfPoolDestroy)};
+}
+
 static inline auto providerMakeUniqueFromOps(umf_memory_provider_ops_t *ops,
                                              void *params) {
   umf_memory_provider_handle_t hProvider;
@@ -326,6 +349,28 @@ inline umf_result_t createMemoryProvider(
   *provider = umfCUDAprovider;
 
   return UMF_RESULT_SUCCESS;
+}
+
+inline umf_result_t createMemoryProxyPool(umf_memory_provider_handle_t provider,
+                                          umf_memory_pool_handle_t *pool) {
+
+  umf_memory_pool_handle_t _pool = nullptr;
+
+  umf_result_t UmfResult =
+      umfPoolCreate(umfProxyPoolOps(), provider, nullptr, 0, &_pool);
+  UMF_RETURN_UMF_ERROR(UmfResult);
+
+  *pool = _pool;
+
+  return UMF_RESULT_SUCCESS;
+}
+
+inline ur_result_t umfCUDAFree(void *ptr) {
+  if (auto pool = umfPoolByPtr(ptr)) {
+    return umf2urResult(umfPoolFree(pool, ptr));
+  }
+
+  return UR_RESULT_ERROR_INVALID_MEM_OBJECT;
 }
 
 } // namespace umf
