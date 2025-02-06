@@ -38,6 +38,8 @@ class UMFSuite(Suite):
         benches = [
             GBench(self),
             GBenchUmfProxy(self),
+            GBenchJemalloc(self),
+            GBenchTbbProxy(self),
         ]
 
         return benches
@@ -139,6 +141,8 @@ class GBench(ComputeUMFBenchmark):
         return list_split[self.idx_pool], list_split[self.idx_config]
 
     def get_mean(self, datarow):
+        print("col nr:", self.col_statistics_time, "row:", datarow, "\nmean:", datarow[self.col_statistics_time])
+
         return float(datarow[self.col_statistics_time])
 
     def parse_output(self, output):
@@ -146,6 +150,8 @@ class GBench(ComputeUMFBenchmark):
         reader = csv.reader(csv_file)
 
         data_row = next(reader, None)
+        print("header:", data_row)
+
         if data_row is None:
             raise ValueError("Benchmark output does not contain data.")
 
@@ -155,6 +161,8 @@ class GBench(ComputeUMFBenchmark):
                 full_name = row[self.col_name]
                 pool, config = self.get_pool_and_config(full_name)
                 mean = self.get_mean(row)
+                print("\tMY OUTPUT", pool, config, "mean", mean)
+
                 results.append((config, pool, mean))
             except KeyError as e:
                 raise ValueError(f"Error parsing output: {e}")
@@ -185,6 +193,8 @@ class GBenchPreloaded(GBench):
         reader = csv.reader(csv_file)
 
         data_row = next(reader, None)
+        print("header:", data_row)
+
         if data_row is None:
             raise ValueError("Benchmark output does not contain data.")
 
@@ -196,6 +206,8 @@ class GBenchPreloaded(GBench):
                 mean = self.get_mean(row)
                 updated_pool = self.get_preloaded_name(pool)
                 updated_config = self.get_preloaded_name(config)
+                print("PRE MY OUTPUT", updated_config, updated_pool, "preload mean", mean)
+
 
                 results.append((updated_config, updated_pool, mean))
             except KeyError as e:
@@ -203,11 +215,28 @@ class GBenchPreloaded(GBench):
 
         return results
     
+class GBenchGlibc(GBenchPreloaded):
+    def __init__(self, bench, replacing_lib):
+        super().__init__(bench, lib_to_be_replaced="glibc", replacing_lib=replacing_lib)
 
-class GBenchUmfProxy(GBenchPreloaded):
+class GBenchUmfProxy(GBenchGlibc):
     def __init__(self, bench):
-        super().__init__(bench, lib_to_be_replaced="glibc", replacing_lib="umfProxy")
+        super().__init__(bench, replacing_lib="umfProxy")
 
     def extra_env_vars(self) -> dict:
         umf_proxy_path = os.path.join(options.umf, "lib", "libumf_proxy.so")
         return {"LD_PRELOAD": umf_proxy_path}
+    
+class GBenchJemalloc(GBenchGlibc):
+    def __init__(self, bench):
+        super().__init__(bench, replacing_lib="jemalloc")
+
+    def extra_env_vars(self) -> dict:
+        return {"LD_PRELOAD": "libjemalloc.so"}
+    
+class GBenchTbbProxy(GBenchGlibc):
+    def __init__(self, bench):
+        super().__init__(bench, replacing_lib="tbbProxy")
+
+    def extra_env_vars(self) -> dict:
+        return {"LD_PRELOAD": "libtbbmalloc_proxy.so"}
