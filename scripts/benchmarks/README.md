@@ -37,10 +37,19 @@ By default, the benchmark results are not stored. To store them, use the option 
 
 To compare a benchmark run with a previously stored result, use the option `--compare <name>`. You can compare with more than one result.
 
+In a markdown output file (see below), listing more than two `--compare` options results in displaying performance time. If only one `--compare` option is specified, the relative performance of provided results is calculated against previously saved `baseline`. You can compare your data against results other than `baseline` by using:
+
+ `--compare <name> --relative-perf <name> --compare <new_baseline> --new-base-name <new_baseline>`.
+
 If no `--compare` option is specified, the benchmark run is compared against a previously stored `baseline`.
 
 Baseline, as well as baseline-v2 (for the level-zero adapter v2) is updated automatically during a nightly job. The results
 are stored [here](https://oneapi-src.github.io/unified-runtime/benchmark_results.html).
+
+
+## Output formats
+You can display the results in the form of a HTML file by using `--ouptut-html` and a markdown file by using `--output-markdown`. Due to character limits for posting PR comments, the final content of the markdown file might be reduced. In order to obtain the full markdown output, use `--output-markdown full`.
+
 
 ## Requirements
 
