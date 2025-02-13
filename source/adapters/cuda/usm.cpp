@@ -102,53 +102,12 @@ urUSMSharedAlloc(ur_context_handle_t hContext, ur_device_handle_t hDevice,
   return UR_RESULT_SUCCESS;
 }
 
-ur_result_t USMFreeImpl(ur_context_handle_t hContext, void *Pointer) {
-  ur_result_t Result = UR_RESULT_SUCCESS;
-  try {
-    unsigned int IsManaged;
-    unsigned int Type;
-    unsigned int DeviceOrdinal;
-    const int NumAttributes = 3;
-    void *AttributeValues[NumAttributes] = {&IsManaged, &Type, &DeviceOrdinal};
-
-    CUpointer_attribute Attributes[NumAttributes] = {
-        CU_POINTER_ATTRIBUTE_IS_MANAGED, CU_POINTER_ATTRIBUTE_MEMORY_TYPE,
-        CU_POINTER_ATTRIBUTE_DEVICE_ORDINAL};
-    UR_CHECK_ERROR(cuPointerGetAttributes(
-        NumAttributes, Attributes, AttributeValues, (CUdeviceptr)Pointer));
-    UR_ASSERT(Type == CU_MEMORYTYPE_DEVICE || Type == CU_MEMORYTYPE_HOST,
-              UR_RESULT_ERROR_INVALID_MEM_OBJECT);
-
-    std::vector<ur_device_handle_t> ContextDevices = hContext->getDevices();
-    ur_platform_handle_t Platform = ContextDevices[0]->getPlatform();
-    unsigned int NumDevices = Platform->Devices.size();
-    UR_ASSERT(DeviceOrdinal < NumDevices, UR_RESULT_ERROR_INVALID_DEVICE);
-
-    ur_device_handle_t Device = Platform->Devices[DeviceOrdinal].get();
-    umf_memory_pool_handle_t MemoryPool;
-
-    if (IsManaged) {
-      MemoryPool = Device->MemoryPoolShared;
-    } else if (Type == CU_MEMORYTYPE_DEVICE) {
-      MemoryPool = Device->MemoryPoolDevice;
-    } else {
-      MemoryPool = hContext->MemoryPoolHost;
-    }
-
-    UMF_CHECK_ERROR(umfPoolFree(MemoryPool, Pointer));
-  } catch (ur_result_t Err) {
-    Result = Err;
-  }
-  return Result;
-}
-
 /// USM: Frees the given USM pointer associated with the context.
 ///
 UR_APIEXPORT ur_result_t UR_APICALL urUSMFree(ur_context_handle_t hContext,
                                               void *pMem) {
-  if (auto Pool = umfPoolByPtr(pMem))
-    return umf::umf2urResult(umfPoolFree(Pool, pMem));
-  return USMFreeImpl(hContext, pMem);
+  (void)hContext; // unused
+  return umf::umfCUDAFree(pMem);
 }
 
 ur_result_t USMDeviceAllocImpl(void **ResultPtr, ur_context_handle_t,
